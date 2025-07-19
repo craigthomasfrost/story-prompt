@@ -3,6 +3,7 @@ const path = require('path');
 const axios = require('axios');
 const dayjs = require('dayjs');
 
+// Define the OpenAI tool schema (Zod-style function)
 const toolDefinition = {
   type: 'function',
   function: {
@@ -27,6 +28,12 @@ const toolDefinition = {
 
 const postsDir = path.join(process.cwd(), '_posts');
 
+// ✅ Ensure _posts/ directory exists
+if (!fs.existsSync(postsDir)) {
+  fs.mkdirSync(postsDir, { recursive: true });
+}
+
+// 🧠 Read previous 30 posts to avoid duplicates
 const readPreviousPrompts = () => {
   if (!fs.existsSync(postsDir)) return [];
   return fs.readdirSync(postsDir)
@@ -48,6 +55,7 @@ const readPreviousPrompts = () => {
 const previousPrompts = readPreviousPrompts();
 const titleList = previousPrompts.map(p => `• **${p.title}** — ${p.description}`).join('\n');
 
+// 🔥 Generate new prompt with OpenAI
 (async () => {
   const response = await axios.post('https://api.openai.com/v1/chat/completions', {
     model: 'gpt-4o',
@@ -75,10 +83,12 @@ const titleList = previousPrompts.map(p => `• **${p.title}** — ${p.descripti
   const toolCall = response.data.choices[0].message.tool_calls?.[0];
   const { title, description } = JSON.parse(toolCall.function.arguments);
 
+  // 📝 Save as markdown file
   const date = dayjs().format('YYYY-MM-DD');
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   const filename = path.join(postsDir, `${date}-${slug}.md`);
   const markdown = `---\ntitle: "${title}"\ndate: ${date}\nlayout: post\n---\n\n${description}\n`;
 
   fs.writeFileSync(filename, markdown, 'utf8');
+  console.log(`✅ Prompt written to ${filename}`);
 })();
