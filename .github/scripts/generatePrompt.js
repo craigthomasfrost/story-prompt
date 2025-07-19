@@ -86,7 +86,7 @@ const promptList = previousPrompts.map(p => `• **${p.title}** — ${p.descript
   const date = dayjs().format('YYYY-MM-DD');
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   const filename = path.join(postsDir, `${date}-${slug}.md`);
-  const markdown = `---\ntitle: "${title}"\n---\n${description}\n`;
+  const markdown = `---\ntitle: "${title}"\ndate: ${date}\nlayout: post\n---\n\n${description}\n`;
 
   fs.writeFileSync(filename, markdown, 'utf8');
   console.log(`Prompt written to ${filename}`);
