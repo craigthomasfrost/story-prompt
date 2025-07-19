@@ -22,7 +22,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install axios dayjs
+        run: npm install axios dayjs gray-matter
 
       - name: Generate story prompt
         run: node .github/scripts/generatePrompt.js
