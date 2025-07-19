@@ -2,12 +2,15 @@ name: Generate Daily Story Prompt
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Every day at 12am PT
-  workflow_dispatch:      # Optional manual trigger
+    - cron: '0 14 * * *'  # Runs daily at 7am PT
+  workflow_dispatch:      # Allow manual triggering
 
 jobs:
   generate:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write     # ✅ Allow the GitHub Actions bot to push commits
 
     steps:
       - name: Checkout repository
@@ -21,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: npm install axios dayjs
 
-      - name: Generate prompt
+      - name: Generate story prompt
         run: node .github/scripts/generatePrompt.js
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -31,5 +34,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add _posts/
-          git commit -m "Add story prompt for $(date +'%Y-%m-%d')" || echo "No changes"
+          git commit -m "Add story prompt for $(date +'%Y-%m-%d')" || echo "No changes to commit"
           git push
